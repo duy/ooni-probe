@@ -18,6 +18,10 @@ from zope.interface import Interface, Attribute
 
 from twisted.python import failure
 from twisted.internet import reactor, defer
+from ooni.utils import log
+
+import logging
+logging.basicConfig(level=logging.DEBUG)
 
 class Worker(object):
     """
@@ -29,6 +33,9 @@ class Worker(object):
         @param maxconcurrent: how many test instances should be run
                               concurrently.
         """
+
+        log.debug( "Worker.__init__")
+
         self.reactor = reactor
         self.maxconcurrent = maxconcurrent
         self._running = 0
@@ -43,6 +50,9 @@ class Worker(object):
 
         @param r: the return value of a previous test.
         """
+
+        log.debug("Worker._run")
+
         if self._running > 0:
             self._running -= 1
 
@@ -79,6 +89,9 @@ class Worker(object):
                          is an instantiated test and idx is the index we are
                          currently at.
         """
+
+        log.debug("Worker.push")
+
         if self._running < self.maxconcurrent:
             asset, test, idx = workunit
             if not test.ended:
@@ -99,6 +112,9 @@ class WorkGenerator(object):
     size = 10
 
     def __init__(self, test, arguments=None, start=None):
+
+        log.debug("WorkGenerator.__init__")
+
         self.Test = test
 
         if self.Test.assets and self.Test.assets.values()[0]:
@@ -114,6 +130,9 @@ class WorkGenerator(object):
             self.skip(start)
 
     def __iter__(self):
+
+        log.debug("WorkGenerator.__iter__")
+
         return self
 
     def skip(self, start):
@@ -122,12 +141,18 @@ class WorkGenerator(object):
 
         @param start: int how many items we should skip.
         """
+
+        log.debug("WorkGenerator.skip")
+
         for j in xrange(0, start-1):
             for i in xrange(0, self.size):
                 self.assetGenerator.next()
             self.idx += 1
 
     def next(self):
+
+        log.debug("WorkGenerator.next")
+
         if self.end:
             raise StopIteration
 

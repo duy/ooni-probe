@@ -34,10 +34,10 @@ def start(logfile=None, loglevel=None, logstdout=True):
         msg("Started OONI")
 
 def msg(message, level=INFO, **kw):
-    log.msg(message, logLevel=level, **kw)
+    log.msg("INFO: " + message, logLevel=level, **kw)
 
 def err(message, **kw):
-    log.err(message, **kw)
+    log.err("ERROR: " + message, **kw)
 
 def debug(message, **kw):
-    log.msg(message, logLevel=DEBUG, **kw)
+    log.msg("DEBUG: " + message, logLevel=DEBUG, **kw)

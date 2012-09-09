@@ -13,6 +13,9 @@ from ooni.plugoo import assets, work
 from ooni.plugoo.reports import Report
 from ooni.plugoo.interface import ITest
 
+import logging
+logging.basicConfig(level=logging.DEBUG)
+
 
 class OONITest(object):
     """
@@ -28,8 +31,13 @@ class OONITest(object):
     tool = False
     ended = False
 
+    logging.debug("OONITest.")
+
     def __init__(self, local_options, global_options, report, ooninet=None,
             reactor=None):
+
+        logging.debug("OONITest.__init__")
+
         # These are the options that are read through the tests suboptions
         self.local_options = local_options
         # These are the options global to all of OONI
@@ -47,16 +55,23 @@ class OONITest(object):
         Override this method if you are interested in having some extra
         behavior when your test class is instantiated.
         """
-        pass
+
+        logging.debug("OONITest.initialize")
 
     def load_assets(self):
         """
         This method should be overriden by the test writer to provide the logic
         for loading their assets.
         """
+
+        logging.debug("OONITest.load_assets")
+
         return {}
 
     def __repr__(self):
+
+        logging.debug("OONITest.__repr__")
+
         return "<OONITest %s %s %s>" % (self.options, self.global_options,
                                            self.assets)
 
@@ -64,6 +79,9 @@ class OONITest(object):
         """
         State that the current test should finish.
         """
+
+        logging.debug("OONITest.end")
+
         self.ended = True
 
     def finished(self, return_value):
@@ -71,6 +89,9 @@ class OONITest(object):
         The Test has finished running, we must now calculate the test runtime
         and add all time data to the report.
         """
+
+        log.debug("OONITest.finished")
+
         #self.ooninet.report(result)
         self.end_time = date.now()
         result = self.result
@@ -78,7 +99,7 @@ class OONITest(object):
         result['end_time'] = str(self.end_time)
         result['run_time'] = str(self.end_time - self.start_time)
         result['return_value'] = return_value
-        log.msg("FINISHED %s" % result)
+        log.msg("OONITest.FINISHED %s" % result)
         self.report(result)
         return result
 
@@ -92,6 +113,9 @@ class OONITest(object):
 
         returns a deferred.
         """
+
+        log.debug("OONITest._do_experiment")
+
         if self.blocking:
             self.d = threads.deferToThread(self.experiment, args)
         else:
@@ -109,7 +133,7 @@ class OONITest(object):
 
         @param args: the asset(s) lines that we are working on.
         """
-        log.msg("Doing control")
+        log.msg("OONITest.control")
         return result
 
     def experiment(self, args):
@@ -119,7 +143,7 @@ class OONITest(object):
 
         @param args: the asset(s) lines that we are working on.
         """
-        log.msg("Doing experiment")
+        log.msg("OONITest.experiment")
         d = defer.Deferred()
         return d
 
@@ -130,7 +154,10 @@ class OONITest(object):
 
         @param args: the asset(s) lines that we are working on.
         """
+
+        log.debug("OONITest.startTest")
+
         self.start_time = date.now()
-        log.msg("Starting test %s" % self.__class__)
+        log.msg("OONITest: Starting test %s" % self.__class__)
         return self._do_experiment(args)
 

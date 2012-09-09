@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #
 #
 #    domclass
@@ -36,12 +37,16 @@ from ooni.plugoo.assets import Asset
 from ooni.utils import log
 from ooni.protocols.http import HTTPTest
 
+import logging
+logging.basicConfig(level=logging.DEBUG)
+
 class domclassArgs(usage.Options):
     optParameters = [['output', 'o', None, 'Output to write'],
                      ['file', 'f', None, 'Corpus file'],
                      ['fileb', 'b', None, 'Corpus file'],
                      ['asset', 'a', None, 'URL List'],
-                     ['resume', 'r', 0, 'Resume at this index']]
+                     ['resume', 'r', 0, 'Resume at this index'],
+                    ]
 
 # All HTML4 tags
 # XXX add link to W3C page where these came from
@@ -67,7 +72,7 @@ commontags = ['A', 'B', 'BLOCKQUOTE', 'BODY', 'BR', 'BUTTON', 'CAPTION',
            'STRIKE', 'STRONG', 'STYLE', 'SUB', 'SUP', 'TABLE', 'TBODY', 'TD',
            'TEXTAREA', 'TFOOT', 'TH', 'THEAD', 'TITLE', 'TR', 'TT', 'U', 'UL']
 
-# The tags we are intested in using for our analysis
+# The tags we are interested in using for our analysis
 thetags = ['A', 'DIV', 'FRAME', 'H1', 'H2',
            'H3', 'H4', 'IFRAME ', 'INPUT',
            'LABEL','LI', 'P', 'SCRIPT', 'SPAN',
@@ -82,7 +87,14 @@ def compute_probability_matrix(dataset):
     import itertools
     import numpy
     ret = {}
+    # create a matrix of 0s of size the number of interested tags +1 = 17x17
     matrix = numpy.zeros((len(thetags) + 1, len(thetags) + 1))
+
+    # put 1s in the matrix in the row x, column y, being x,y the position of the
+    # tags in thetags
+    # if the tag is not in the tag, then use row or column 16 (the len of 
+    # thetags)
+    # for instance, (html, div) => (16,1),(div,a) => (1,0),(html,h1)=> (16,3)
 
     for data in dataset:
         x = data[0].upper()
@@ -99,14 +111,21 @@ def compute_probability_matrix(dataset):
 
         matrix[x,y] += 1
 
+    # walk through every row
+    # xrange is 17
     for x in xrange(len(thetags) + 1):
+        # sum all the elements in the row => number of 1s in the row
         possibilities = 0
+        # matrix[x] have 17 elements
         for y in matrix[x]:
             possibilities += y
 
+        # xrange is 17
+        # replace 1s by  1 / the sum of the 1s of that row 
         for i in xrange(len(matrix[x])):
             if possibilities != 0:
                 matrix[x][i] = matrix[x][i]/possibilities
+
 
     return matrix
 
@@ -116,6 +135,7 @@ def compute_eigenvalues(matrix):
 
     :matrix: must be a square matrix and diagonalizable.
     """
+    import numpy
     return numpy.linalg.eigvals(matrix)
 
 def readDOM(content=None, filename=None):
@@ -143,6 +163,9 @@ def readDOM(content=None, filename=None):
     return couples
 
 class domclassTest(HTTPTest):
+
+    logging.debug("domclassTest")
+
     implements(IPlugin, ITest)
 
     shortName = "domclass"
@@ -150,45 +173,58 @@ class domclassTest(HTTPTest):
     requirements = None
     options = domclassArgs
     blocking = False
-
     follow_redirects = True
+    #FIXME: it's needed to run runTool, but then it's not threaded
     #tool = True
 
     def runTool(self):
-        import yaml, numpy
+    
+        log.debug("domclassTest.runTool")
+        self.a = {}
+        self.b = {}
+
+        #import yaml, numpy
+        import numpy
         site_a = readDOM(filename=self.local_options['file'])
         site_b = readDOM(filename=self.local_options['fileb'])
-        a['matrix'] = compute_probability_matrix(site_a)
-        a['eigen'] = compute_eigenvalue(a['matrix'])
+        self.a['matrix'] = compute_probability_matrix(site_a)
+        self.a['eigen'] = compute_eigenvalues(self.a['matrix'])
 
-        self.result['eigenvalues'] = a['eigen']
-        b['matrix'] = compute_probability_matrix(site_b)
-        b['eigen'] = compute_eigenvalue(b['matrix'])
+        self.result['eigenvalues'] = self.a['eigen']
+        self.b['matrix'] = compute_probability_matrix(site_b)
+        self.b['eigen'] = compute_eigenvalues(self.b['matrix'])
 
         #print "A: %s" % a
         #print "B: %s" % b
-        correlation = numpy.vdot(a['eigen'],b['eigen'])
-        correlation /= numpy.linalg.norm(a['eigen'])*numpy.linalg.norm(b['eigen'])
+        correlation = numpy.vdot(self.a['eigen'],self.b['eigen'])
+        correlation /= numpy.linalg.norm(self.a['eigen'])*numpy.linalg.norm(self.b['eigen'])
         correlation = (correlation + 1)/2
         print "Corelation: %s" % correlation
 
+        #self.finished({})
+
     def processResponseBody(self, data):
-        import yaml, numpy
+    
+        log.debug("domclassTest.processResponseBody")
+        self.a = {}
+        self.b = {}
+
+        #import yaml, numpy
         site_a = readDOM(data)
         #site_b = readDOM(self.local_options['fileb'])
-        a['matrix'] = compute_probability_matrix(site_a)
-        a['eigen'] = compute_eigenvalue(a['matrix'])
+        self.a['matrix'] = compute_probability_matrix(site_a)
+        self.a['eigen'] = compute_eigenvalues(self.a['matrix'])
 
 
         if len(data) == 0:
             self.result['eigenvalues'] = None
             self.result['matrix'] = None
         else:
-            self.result['eigenvalues'] = a['eigen']
-            #self.result['matrix'] = a['matrix']
+            self.result['eigenvalues'] = self.a['eigen']
+            #self.result['matrix'] = self.a['matrix']
         #self.result['content'] = data[:200]
-        #b = compute_matrix(site_b)
-        print "A: %s" % a
-        return a['eigen']
+        #self.b = compute_matrix(site_b)
+        print "A: %s" % self.a
+        return self.a['eigen']
 
 domclass = domclassTest(None, None, None)

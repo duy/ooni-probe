@@ -32,6 +32,9 @@ from ooni.utils.logo import getlogo
 from ooni.utils import log
 from ooni import plugins
 
+import logging
+logging.basicConfig(level=logging.DEBUG)
+
 __version__ = "0.0.1-prealpha"
 
 def retrieve_plugoo():
@@ -39,20 +42,24 @@ def retrieve_plugoo():
     Get all the plugins that implement the ITest interface and get the data
     associated to them into a dict.
     """
+
+    #FIXME: changed d and p for data and plugin
+    logging.debug("retrieve_plugoo")
+
     interface = tests.ITest
-    d = {}
+    data = {}
     error = False
-    for p in getPlugins(interface, plugins):
+    for plugin in getPlugins(interface, plugins):
         try:
-            verifyObject(interface, p)
-            d[p.shortName] = p
+            verifyObject(interface, plugin)
+            data[plugin.shortName] = plugin
         except BrokenImplementation, bi:
             print "Plugin Broken"
             print bi
             error = True
     if error != False:
         print "Plugin Loaded!"
-    return d
+    return data
 
 plugoo = retrieve_plugoo()
 
@@ -67,6 +74,9 @@ def runTest(test, options, global_options, reactor=reactor):
 
     @param global_options: the global options for OONI
     """
+    
+    logging.debug("runTest")
+    
     parallelism = int(global_options['parallelism'])
     worker = work.Worker(parallelism, reactor=reactor)
     test_class = plugoo[test].__class__
@@ -95,6 +105,9 @@ def runTest(test, options, global_options, reactor=reactor):
         worker.push(x)
 
 class Options(usage.Options):
+
+    logging.debug("Options")
+
     tests = plugoo.keys()
     subCommands = []
     for test in tests:
@@ -130,6 +143,9 @@ class Options(usage.Options):
                self.getUsage(width=None).replace("Commands:", "Tests:")
 
 if __name__ == "__main__":
+
+    logging.debug("main")
+
     config = Options()
     config.parseOptions()
 
@@ -139,6 +155,8 @@ if __name__ == "__main__":
         sys.exit(1)
 
     runTest(config.subCommand, config.subOptions, config)
+
+    log.debug("In main, end runTest")
 
     reactor.run()
 

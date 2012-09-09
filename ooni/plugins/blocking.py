@@ -5,6 +5,9 @@ from twisted.plugin import IPlugin
 from ooni.plugoo.assets import Asset
 from ooni.plugoo.tests import ITest, OONITest
 
+import logging
+logging.basicConfig(level=logging.DEBUG)
+
 class BlockingArgs(usage.Options):
     optParameters = [['asset', 'a', None, 'Asset file'],
                      ['resume', 'r', 0, 'Resume at this index'],
@@ -19,6 +22,8 @@ class BlockingTest(OONITest):
     options = BlockingArgs
     # Tells this to be blocking.
     blocking = True
+
+    logging.debug("BlockingTest")
 
     def control(self, experiment_result, args):
         print "Experiment Result:", experiment_result

@@ -23,6 +23,9 @@ from twisted.plugin import IPlugin
 from ooni.plugoo.assets import Asset
 from ooni.plugoo.tests import ITest, OONITest
 
+import logging
+logging.basicConfig(level=logging.DEBUG)
+
 class HTTPHostArgs(usage.Options):
     optParameters = [['asset', 'a', None, 'Asset file'],
                      ['controlserver', 'c', 'google.com', 'Specify the control server'],
@@ -60,6 +63,8 @@ class HTTPHostTest(OONITest):
     options = HTTPHostArgs
     # Tells this to be blocking.
     blocking = True
+
+    logging.debug("HTTPHostTest")
 
     def check_response(self, response):
         soup = BeautifulSoup(response)

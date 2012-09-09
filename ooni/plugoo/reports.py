@@ -6,6 +6,9 @@ import yaml
 import itertools
 from ooni.utils import log, date, net
 
+import logging
+logging.basicConfig(level=logging.DEBUG)
+
 class Report:
     """This is the ooni-probe reporting mechanism. It allows
     reporting to multiple destinations and file formats.
@@ -24,6 +27,9 @@ class Report:
                  scp=None,
                  tcp=None):
 
+
+        logging.debug("Report.__init__")
+
         self.testname = testname
         self.file = file
         self.tcp = tcp
@@ -41,6 +47,9 @@ class Report:
         self.write_header()
 
     def write_header(self):
+
+        logging.debug("Report.write_header")
+
         pretty_date = date.pretty_date()
         header = "# OONI Probe Report for Test %s\n" % self.testname
         header += "# %s\n\n" % pretty_date
@@ -54,6 +63,9 @@ class Report:
         self(test_details)
 
     def _write_to_report(self, dump):
+
+        logging.debug("Report._write_to_report")
+
         reports = []
 
         if self.file:
@@ -74,6 +86,9 @@ class Report:
         This should be invoked every time you wish to write some
         data to the reporting system
         """
+
+        logging.debug("Report.__call__")
+
         dump = yaml.dump([data])
         self._write_to_report(dump)
 
@@ -81,6 +96,9 @@ class Report:
         """
         This reports to a file in YAML format
         """
+
+        logging.debug("Report.file_report")
+
         with open(self.file, 'a+') as f:
             f.write(data)
 
@@ -89,6 +107,9 @@ class Report:
         This sends the report using the
         specified type.
         """
+
+        logging.debug("Report.send_report")
+
         #print "Reporting %s to %s" % (data, type)
         log.msg("Reporting to %s" % type)
         getattr(self, type+"_report").__call__(data)

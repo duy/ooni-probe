@@ -14,6 +14,9 @@ from ooni.protocols.scapyproto import ScapyTest
 
 from ooni.lib.txscapy import txsr, txsend
 
+import logging
+logging.basicConfig(level=logging.DEBUG)
+
 class scapyArgs(usage.Options):
     optParameters = [['dst', 'd', None, 'Specify the target address'],
                      ['port', 'p', None, 'Specify the target port'],
@@ -40,7 +43,12 @@ class ChinaTriggerTest(ScapyTest):
     pcapfile = 'example_scapy.pcap'
     timeout = 5
 
+    logging.debug("ChinaTriggerTest")
+
     def initialize(self, reactor=None):
+
+        logging.debug("ChinaTriggerTest.initialize")
+
         if not self.reactor:
             from twisted.internet import reactor
             self.reactor = reactor

@@ -1,9 +1,16 @@
 from zope.interface import implements, Interface, Attribute
+#FIXME: implements not needed here
+
+import logging
+logging.basicConfig(level=logging.DEBUG)
 
 class ITest(Interface):
     """
     This interface represents an OONI test. It fires a deferred on completion.
     """
+
+
+    logging.debug("ITest")
 
     shortName = Attribute("""A short user facing description for this test""")
     description = Attribute("""A string containing a longer description for the test""")
@@ -25,6 +32,8 @@ class ITest(Interface):
         Anything returned by control ends up inside of the YAMLOONI report.
         """
 
+        logging.debug("ITest.control")
+
     def experiment(args):
         """
         Perform all the operations that are necessary to running a test.
@@ -44,6 +53,8 @@ class ITest(Interface):
         If the test does not have any assets it should return an empty dict.
         """
 
+        logging.debug("ITest.load_assets")
+
     def end():
         """
         This can be called at any time to terminate the execution of all of
@@ -52,4 +63,6 @@ class ITest(Interface):
         What this means is that no more test instances with new parameters will
         be created. A report will be written.
         """
+
+        logging.debug("ITest.end")
 

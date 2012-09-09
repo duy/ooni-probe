@@ -14,8 +14,17 @@ from ooni.plugoo.assets import Asset
 from ooni.protocols import daphn3
 from ooni.utils import log
 
+import logging
+logging.basicConfig(level=logging.DEBUG)
+
 class Daphn3ClientProtocol(daphn3.Daphn3Protocol):
+
+    logging.debug("Daphn3ClientProtocol")
+
     def connectionMade(self):
+
+        logging.debug("Daphn3ClientFactory.connectionMade")
+
         self.next_state()
 
 class Daphn3ClientFactory(protocol.ClientFactory):
@@ -24,7 +33,12 @@ class Daphn3ClientFactory(protocol.ClientFactory):
     steps = None
     test = None
 
+    logging.debug("Daphn3ClientFactory")
+
     def buildProtocol(self, addr):
+
+        logging.debug("Daphn3ClientFactory.buildProtocol")
+
         p = self.protocol()
         p.factory = self
         p.test = self.test
@@ -44,6 +58,9 @@ class Daphn3ClientFactory(protocol.ClientFactory):
         return p
 
     def clientConnectionFailed(self, reason):
+
+        logging.debug("Daphn3ClientFactory.clientConnectionFailed")
+
         print "We failed connecting the the OONIB"
         print "Cannot perform test. Perhaps it got blocked?"
         print "Please report this to tor-assistants@torproject.org"
@@ -51,6 +68,9 @@ class Daphn3ClientFactory(protocol.ClientFactory):
         self.test.end(d)
 
     def clientConnectionLost(self, reason):
+
+        logging.debug("Daphn3ClientFactory.clientConnectionLost")
+
         print "Connection Lost."
 
 class daphn3Args(usage.Options):
@@ -80,7 +100,12 @@ class daphn3Test(OONITest):
 
     steps = None
 
+    logging.debug("daphn3Test")
+
     def initialize(self):
+
+        logging.debug("daphn3Test.initialize")
+
         if not self.local_options:
             self.end()
             return
@@ -99,6 +124,9 @@ class daphn3Test(OONITest):
             self.end()
 
     def runTool(self):
+
+        logging.debug("daphn3Test.runTool")
+
         import yaml
         pcap = daphn3.read_pcap(self.local_options['pcap'])
         f = open(self.local_options['output'], 'w')
@@ -106,6 +134,9 @@ class daphn3Test(OONITest):
         f.close()
 
     def control(self, exp_res, args):
+
+        logging.debug("daphn3Test.control")
+
         try:
             mutation = self.factory.mutator.get(0)
             self.result['censored'] = False
@@ -116,11 +147,17 @@ class daphn3Test(OONITest):
                 'value': mutation}
 
     def _failure(self, *argc, **kw):
+
+        logging.debug("daphn3Test._failure")
+
         self.result['censored'] = True
         self.result['error'] = ('Failed in connecting', (argc, kw))
         self.end()
 
     def experiment(self, args):
+
+        logging.debug("daphn3Test.experiment")
+
         log.msg("Doing mutation %s" % args['mutation'])
         self.factory.steps = self.steps
         host = self.local_options['host']
@@ -136,6 +173,9 @@ class daphn3Test(OONITest):
         return d
 
     def load_assets(self):
+
+        logging.debug("daphn3Test.load_assets")
+
         if not self.local_options:
             return {}
         if not self.steps:

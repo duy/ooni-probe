@@ -27,6 +27,9 @@ from ooni.plugoo.tests import ITest, OONITest
 from ooni.protocols import http
 from ooni.utils import log
 
+import logging
+logging.basicConfig(level=logging.DEBUG)
+
 try:
     from dns import resolver
 except ImportError:
@@ -49,6 +52,9 @@ class CaptivePortal(OONITest):
     Compares content and status codes of HTTP responses, and attempts
     to determine if content has been altered.
     """
+
+
+    logging.debug("CaptivePortal")
 
     implements(IPlugin, ITest)
 

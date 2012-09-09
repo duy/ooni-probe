@@ -19,6 +19,10 @@ import yaml
 
 import logging
 import itertools
+from ooni.utils import log
+
+#FIXME: calling it here as this is the first file to load, but don't have global_options
+#log.start(global_options['log'], 1)
 
 def gen_headers(self, options="common"):
     """

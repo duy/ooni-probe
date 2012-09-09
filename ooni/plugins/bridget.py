@@ -12,6 +12,9 @@ from ooni.utils import log
 from ooni.plugoo.tests import ITest, OONITest
 from ooni.plugoo.assets import Asset
 
+import logging
+logging.basicConfig(level=logging.DEBUG)
+
 class bridgetArgs(usage.Options):
     optParameters = [['bridges', 'b', None, 'List of bridges to scan'],
                      ['relays', 'f', None, 'List of relays to scan'],
@@ -25,6 +28,8 @@ class bridgetTest(OONITest):
     requirements = None
     options = bridgetArgs
     blocking = False
+
+    logging.debug("bridgetTest")
 
     def experiment(self, args):
         log.msg("Doing test")

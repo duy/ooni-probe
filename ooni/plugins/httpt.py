@@ -11,6 +11,9 @@ from ooni.plugoo.assets import Asset
 from ooni.protocols import http
 from ooni.utils import log
 
+import logging
+logging.basicConfig(level=logging.DEBUG)
+
 class httptArgs(usage.Options):
     optParameters = [['urls', 'f', None, 'Urls file'],
                      ['url', 'u', 'http://torproject.org/', 'Test single site'],
@@ -25,6 +28,8 @@ class httptTest(http.HTTPTest):
     requirements = None
     options = httptArgs
     blocking = False
+
+    logging.debug("httptTest")
 
 
     def testPattern(self, value, pattern, type):

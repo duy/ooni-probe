@@ -13,6 +13,9 @@ from ooni.plugoo.tests import ITest, OONITest
 from ooni.plugoo.assets import Asset
 from ooni.utils import log
 
+import logging
+logging.basicConfig(level=logging.DEBUG)
+
 class tcpconnectArgs(usage.Options):
     optParameters = [['asset', 'a', None, 'File containing IP:PORT combinations, one per line.'],
                      ['resume', 'r', 0, 'Resume at this index']]
@@ -26,7 +29,12 @@ class tcpconnectTest(OONITest):
     options = tcpconnectArgs
     blocking = False
 
+    logging.debug("tcpconnectTest")
+
     def experiment(self, args):
+
+        log.debug("tcpconnectTest.experiment")
+
         try:
             host, port = args['asset'].split(':')
         except:
@@ -37,8 +45,8 @@ class tcpconnectTest(OONITest):
 
         def gotProtocol(p):
             p.transport.loseConnection()
-            log.msg("Got a connection!")
-            log.msg(str(p))
+            log.msg("tcpconnectTest.experiment: Got a connection!")
+            log.msg("tcpconnectTest.experiment: "+str(p))
             return {'result': True, 'target': [host, port]}
 
         def gotError(err):
@@ -54,6 +62,9 @@ class tcpconnectTest(OONITest):
         return d
 
     def load_assets(self):
+
+        logging.debug("tcpconnectTest.load_assets")
+
         if self.local_options:
             return {'asset': Asset(self.local_options['asset'])}
         else:

@@ -7,6 +7,9 @@ from ooni.plugoo.tests import ITest, OONITest
 from ooni.plugoo.assets import Asset
 from ooni.utils import log
 
+import logging
+logging.basicConfig(level=logging.DEBUG)
+
 useragents = [("Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.8.1.6) Gecko/20070725 Firefox/2.0.0.6", "Firefox 2.0, Windows XP"),
               ("Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1)", "Internet Explorer 7, Windows Vista"),
               ("Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1; .NET CLR 1.1.4322; .NET CLR 2.0.50727; .NET CLR 3.0.04506.30)", "Internet Explorer 7, Windows XP"),
@@ -21,13 +24,22 @@ useragents = [("Mozilla/5.0 (Windows; U; Windows NT 5.1; en-GB; rv:1.8.1.6) Geck
 
 class BodyReceiver(protocol.Protocol):
     def __init__(self, finished):
+
+        log.debug("BodyReceiver.__init__")
+
         self.finished = finished
         self.data = ""
 
     def dataReceived(self, bytes):
+
+        log.debug("BodyReceiver.dataReceived")
+
         self.data += bytes
 
     def connectionLost(self, reason):
+
+        log.debug("BodyReceiver.connectionLost")
+
         self.finished.callback(self.data)
 
 from twisted.web.http_headers import Headers
@@ -43,6 +55,9 @@ class HTTPTest(OONITest):
     follow_redirects = False
 
     def initialize(self):
+
+        logging.debug("HTTPTest.initialize")
+
         from twisted.web.client import Agent
         import yaml
 
@@ -55,6 +70,9 @@ class HTTPTest(OONITest):
         self.response = {}
 
     def _processResponseBody(self, data):
+
+        log.debug("HTTPTest._processResponseBody")
+
         self.response['body'] = data
         #self.result['response'] = self.response
         self.processResponseBody(data)
@@ -66,7 +84,8 @@ class HTTPTest(OONITest):
 
         @param data: The content of the body returned.
         """
-        pass
+
+        logging.debug("HTTPTest.processResponseBody")
 
     def processResponseHeaders(self, headers):
         """
@@ -74,7 +93,8 @@ class HTTPTest(OONITest):
 
         @param headers: The content of the returned headers.
         """
-        pass
+
+        log.debug("HTTPTest.processResponseHeaders")
 
     def processRedirect(self, location):
         """
@@ -82,11 +102,12 @@ class HTTPTest(OONITest):
 
         @param location: the url that is being redirected to.
         """
-        pass
+
+        logging.debug("HTTPTest.processRedirect")
 
 
     def experiment(self, args):
-        log.msg("Running experiment")
+        log.msg("HTTPTest.experiment")
         url = self.local_options['url'] if 'url' not in args else args['url']
 
         d = self.build_request(url)
@@ -98,6 +119,9 @@ class HTTPTest(OONITest):
         return d
 
     def _cbResponse(self, response):
+
+        log.debug("HTTPTest._cbResponse")
+
         self.response['headers'] = list(response.headers.getAllRawHeaders())
         self.response['code'] = response.code
         self.response['length'] = response.length
@@ -113,10 +137,16 @@ class HTTPTest(OONITest):
         finished.addCallback(self._processResponseBody)
 
     def randomize_useragent(self):
+
+        log.debug("HTTPTest.randomize_useragent")
+
         user_agent = random.choice(useragents)
         self.request['headers']['User-Agent'] = [user_agent]
 
     def build_request(self, url, method="GET", headers=None, body=None):
+
+        log.debug("HTTPTest.build_request")
+
         self.request['method'] = method
         self.request['url'] = url
         self.request['headers'] = headers if headers else {}
@@ -131,6 +161,9 @@ class HTTPTest(OONITest):
                                   self.request['body'])
 
     def load_assets(self):
+
+        log.debug("HTTPTest.load_assets")
+
         if self.local_options:
             return {'url': Asset(self.local_options['asset'])}
         else:
